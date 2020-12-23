@@ -1,72 +1,99 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import Typography from  '@material-ui/core/Typography';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
+import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import Paper from "@material-ui/core/Paper";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import Chip from "@material-ui/core/Chip";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
 
-// stopped at 14:58 https://www.youtube.com/watch?v=hiiaHyhhwBU&feature=emb_title
+import {CTX} from "./Store"
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-      margin: "50px",
-      padding:theme.spacing(3,2)
-      },
-    flex: {
-        display:"flex",
-    },
-    topicsWindow: {
-        width:"30%",
-        height:"300px",
-        borderRight:"1px solid black",
-    },
-    chatWindow: {
-        width:"70%",
-        height:"300px",
-    } ,
-    chatBox: {
-        width:"85%",
-    },
-    button: {
-        width:"15%"
-    }    
-    
-  }));
+  root: {
+    margin: "50px",
+    padding: theme.spacing(3, 2),
+  },
+  flex: {
+    display: "flex",
+    alignItems: "center",
+  },
+  topicsWindow: {
+    width: "30%",
+    height: "300px",
+    borderRight: "1px solid black",
+  },
+  chatWindow: {
+    width: "70%",
+    height: "300px",
+    padding: "20px",
+  },
+  chatBox: {
+    width: "85%",
+  },
+  button: {
+    width: "15%",
+  },
+}));
 
-export default function Dashboard(){
-    const classes = useStyles();
-    return (
-        <div>
-            <Paper className={classes.root}>
-                <h3>Chat App</h3>
-                <h5>placeholder</h5>
+export default function Dashboard() {
+  const classes = useStyles();
 
-                <div className={classes.flex}>
-                    <div className={classes.topicsWindow}>
-                        <List>
-                            {
-                            ['topic'].map(topic => 
-                            <ListItem key={topic} button>
-                                <ListItemText primary={topic} />
-                            </ListItem>
-                            )}
-                        </List>
+    // CTX state
+  const {allChats, sendChatAction} = React.useContext(CTX)
+  const topics = Object.keys(allChats)
 
-                    </div>
-          
-                    <div className={classes.chatWindow}>
-                    
-                            {
-                            [{from: 'user', msg: "hello"}].map(topic => 
-                                <div className={classes.flex}>
-                                </div>
-                            )}
-                    
-                    </div>
-                </div>
-            </Paper>  
+    // local state 
+  const [activeTopic, changeActiveTopic] = React.useState(topics[0])
+  const [textValue, changeTextValue] = React.useState("");
 
-             
+  return (
+    <div>
+      <Paper className={classes.root}>
+        <h3>Chat App</h3>
+        <h5>{activeTopic}</h5>
+
+        <div className={classes.flex}>
+          <div className={classes.topicsWindow}>
+            <List>
+              {topics.map((topic) => (
+                <ListItem onClick={e => changeActiveTopic(e.target.innerText)} key={topic} button>
+                  <ListItemText primary={topic} />
+                </ListItem>
+              ))}
+            </List>
+          </div>
+
+          <div className={classes.chatWindow}>
+            {
+            allChats[activeTopic].map((chat, i) => (
+              <div className={classes.flex} key={i}>
+                <Chip label={chat.from} className={classes.chip} />
+                <p>{chat.msg}</p>
+              </div>
+            ))}
+          </div>
         </div>
-)};
+        <div className={classes.flex}>
+          <TextField
+            id="standard-name"
+            label="Send a chat"
+            className={classes.chatBox}
+            value={textValue}
+            onChange={e =>changeTextValue(e.target.value)}
+          />
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={()=> {
+              sendChatAction(textValue)
+              changeTextValue("");
+            }}>
+            Send
+          </Button>
+        </div>
+      </Paper>
+    </div>
+  );
+}
